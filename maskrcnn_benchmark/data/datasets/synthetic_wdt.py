@@ -10,6 +10,8 @@ if sys.version_info[0] == 2:
 else:
     import xml.etree.ElementTree as ET
 
+# tag: yang adds
+import numpy as np 
 
 from maskrcnn_benchmark.structures.bounding_box import BoxList
 #tag: yang adds
@@ -38,6 +40,8 @@ class SyntheticWDT(torch.utils.data.Dataset):
         self._annopath = os.path.join(self.root, "Annotations", "%s.xml")
         self._imgpath = os.path.join(self.root, "JPEGImages", "%s.jpg")
         self._imgsetpath = os.path.join(self.root, "ImageSets", "Main", "%s.txt")
+        #tag: yang adds
+        self._maskpath = os.path.join(self.root, "MaskImages", "%s.jpg")
 
         with open(self._imgsetpath % self.image_set) as f:
             self.ids = f.readlines()
@@ -55,13 +59,28 @@ class SyntheticWDT(torch.utils.data.Dataset):
         target = self.get_groundtruth(index)
         target = target.clip_to_image(remove_empty=True)
 
+        # img, target = self.transforms(img, target)
+        # tag: yang adds
+        mask = self.get_mask_from_files(self._maskpath % img_id)
         if self.transforms is not None:
-            img, target = self.transforms(img, target)
+            img, target, mask = self.transforms[0](img, target, mask)
+            img = self.transforms[1](img)
+        return img, target, mask, index
 
-        return img, target, index
+        #tag: yang comments
+        # if self.transforms is not None:
+        #     img, target = self.transforms(img, target)
+        # return img, target, index
 
     def __len__(self):
         return len(self.ids)
+
+    # tag: yang adds
+    def get_mask_from_file(mask_file):
+        mask =  np.array(Image.open(mask_file), dtype=np.float32)
+        # mask = (255-mask)/255. #becasus default mask is white BG
+        mask = 255-mask
+        return mask
 
     def get_groundtruth(self, index):
         img_id = self.ids[index]
