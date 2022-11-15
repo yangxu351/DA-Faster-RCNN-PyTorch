@@ -45,6 +45,82 @@ class RPNHead(nn.Module):
             bbox_reg.append(self.bbox_pred(t))
         return logits, bbox_reg
 
+# tag: yang adds
+@registry.RPN_HEADS.register("SingleConvRPNMaskHead")
+class RPNMaskHead(nn.Module):
+    """
+    Adds a simple RPN Head with classification and regression heads
+    """
+
+    def __init__(self, cfg, in_channels, num_anchors):
+        """
+        Arguments:
+            cfg              : config
+            in_channels (int): number of channels of the input feature
+            num_anchors (int): number of anchors to be predicted
+            soft_val=1.0, layer_levels=['0', '1']
+        """
+        super(RPNMaskHead, self).__init__()
+        self.conv = nn.Conv2d(
+            in_channels, in_channels, kernel_size=3, stride=1, padding=1
+        )
+        self.cls_logits = nn.Conv2d(in_channels, num_anchors, kernel_size=1, stride=1)
+        self.bbox_pred = nn.Conv2d(
+            in_channels, num_anchors * 4, kernel_size=1, stride=1
+        )
+        # tag:
+        self.soft_val = cfg.MODEL.RPN.SOFT_VAL
+        self.layer_levels = cfg.MODEL.RPN.LAYER_LEVELS
+
+        for l in [self.conv, self.cls_logits, self.bbox_pred]:
+            torch.nn.init.normal_(l.weight, std=0.01)
+            torch.nn.init.constant_(l.bias, 0)
+
+    def forward(self, x, masks=None):
+        logits = []
+        bbox_reg = []
+        features = {}
+        for k, feature in x.items():
+            # t = F.relu(self.conv(feature))
+            if masks is not None and k in self.layer_levels:
+                feat_shape = feature.shape[-2:]
+                msk = F.interpolate(masks, size=feat_shape, mode="nearest")
+                if self.soft_val == -1:
+                    soft_msk = torch.rand_like(msk)
+                    ## fixme
+                    soft_msk[msk==1] = 1
+                    msk=soft_msk
+                elif self.soft_val == -0.5:
+                    ### fixme softval-1_halfmax
+                    soft_msk = torch.rand_like(msk)//2
+                    ## fixme
+                    soft_msk[msk==1] = 1
+                    msk=soft_msk
+                else:
+                    # do nothing
+                    soft_msk = torch.ones_like(msk)*self.soft_val
+                    ## fixme
+                    soft_msk[msk==1] = 1
+                    msk=soft_msk
+                rl_feat = F.relu(self.conv(feature))
+                t = rl_feat*msk
+                # fixme: 1
+                # features[k] = t
+            else:
+                t = F.relu(self.conv(feature))
+            #fixme:2
+            features[k] = t
+            logits.append(self.cls_logits(t))
+            bbox_reg.append(self.bbox_pred(t))
+        if masks is not None:
+            return logits, bbox_reg, features
+        else:
+            return logits, bbox_reg
+        # for feature in x:
+        #     t = F.relu(self.conv(feature))
+        #     logits.append(self.cls_logits(t))
+        #     bbox_reg.append(self.bbox_pred(t))
+        # return logits, bbox_reg
 
 class RPNModule(torch.nn.Module):
     """
