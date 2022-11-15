@@ -25,6 +25,7 @@ from maskrcnn_benchmark.utils.imports import import_file
 from maskrcnn_benchmark.utils.logger import setup_logger
 from maskrcnn_benchmark.utils.miscellaneous import mkdir
 
+import datetime
 
 def train(cfg, local_rank, distributed):
     model = build_detection_model(cfg)
@@ -44,11 +45,14 @@ def train(cfg, local_rank, distributed):
     arguments = {}
     arguments["iteration"] = 0
 
-    output_dir = cfg.OUTPUT_DIR
-
+    # output_dir = cfg.OUTPUT_DIR
+    # tag: yang added
+    weight_dir = cfg.WEIGHT_DIR
+    if not os.path.exists(weight_dir):
+        os.mkdir(weight_dir)
     save_to_disk = get_rank() == 0
     checkpointer = DetectronCheckpointer(
-        cfg, model, optimizer, scheduler, output_dir, save_to_disk
+        cfg, model, optimizer, scheduler, weight_dir, save_to_disk
     )
     extra_checkpoint_data = checkpointer.load(cfg.MODEL.WEIGHT)
     arguments.update(extra_checkpoint_data)
@@ -116,11 +120,14 @@ def test(cfg, model, distributed):
         iou_types = iou_types + ("keypoints",)
     output_folders = [None] * len(cfg.DATASETS.TEST)
     dataset_names = cfg.DATASETS.TEST
-    if cfg.OUTPUT_DIR:
-        for idx, dataset_name in enumerate(dataset_names):
-            output_folder = os.path.join(cfg.OUTPUT_DIR, "inference", dataset_name)
-            mkdir(output_folder)
-            output_folders[idx] = output_folder
+    # tag:yang changed
+    if not os.path.exists(cfg.CONFIG_DIR):
+        os.mkdir(cfg.CONFIG_DIR)
+    # if cfg.OUTPUT_DIR:
+    for idx, dataset_name in enumerate(dataset_names):
+        output_folder = os.path.join(cfg.CONFIG_DIR, "inference", dataset_name)
+        mkdir(output_folder)
+        output_folders[idx] = output_folder
     data_loaders_val = make_data_loader(cfg, is_train=False, is_distributed=distributed)
     for output_folder, dataset_name, data_loader_val in zip(output_folders, dataset_names, data_loaders_val):
         inference(
@@ -172,15 +179,21 @@ def main():
         )
         synchronize()
 
+    # tag: yang added
+    time_marker = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+    cfg.WEIGHT_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}' + '_Weights')
+    cfg.LOG_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}' + '_Log')
+    cfg.CONFIG_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}' + '_Config')
+    
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
 
-    output_dir = cfg.OUTPUT_DIR
-    if output_dir:
-        mkdir(output_dir)
+    log_dir = cfg.LOG_DIR
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
 
-    logger = setup_logger("maskrcnn_benchmark", output_dir, get_rank())
+    logger = setup_logger("maskrcnn_benchmark", log_dir, get_rank())
     logger.info("Using {} GPUs".format(num_gpus))
     logger.info(args)
 
