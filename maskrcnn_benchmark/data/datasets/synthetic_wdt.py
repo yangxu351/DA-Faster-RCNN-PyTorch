@@ -41,9 +41,7 @@ class SyntheticWDT(torch.utils.data.Dataset):
 
         with open(self._imgsetpath % self.image_set) as f:
             self.ids = f.readlines()
-        # self.ids = [x.strip("\n") for x in self.ids]
-        #tag: yang changed
-        self.ids = [x.split("\t")[0] for x in self.ids]
+        self.ids = [x.strip("\n") for x in self.ids]
         self.id_to_img_map = {k: v for k, v in enumerate(self.ids)}
 
         cls = SyntheticWDT.CLASSES
