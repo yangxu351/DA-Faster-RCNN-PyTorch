@@ -189,7 +189,8 @@ class FastRCNNLossComputation(object):
         )
 
         domain_masks = cat([proposal.get_field("domain_labels") for proposal in proposals], dim=0)
-
+        # tag: yang changed
+        domain_masks = domain_masks.bool()
         class_logits = class_logits[domain_masks, :]
         box_regression = box_regression[domain_masks, :]
         labels = labels[domain_masks]

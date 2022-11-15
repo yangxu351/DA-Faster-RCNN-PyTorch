@@ -37,6 +37,8 @@ class DALossComputation(object):
         for targets_per_image in targets:
             is_source = targets_per_image.get_field('is_source')
             mask_per_image = is_source.new_ones(1, dtype=torch.uint8) if is_source.any() else is_source.new_zeros(1, dtype=torch.uint8)
+            #tag: yang changed
+            mask_per_image = mask_per_image.bool()
             masks.append(mask_per_image)
         return masks
 
