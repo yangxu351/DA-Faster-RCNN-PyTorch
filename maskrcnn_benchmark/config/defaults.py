@@ -66,6 +66,8 @@ _C.DATASETS.SOURCE_TRAIN = ()
 _C.DATASETS.TARGET_TRAIN = ()
 # List of the dataset names for testing, as present in paths_catalog.py
 _C.DATASETS.TEST = ()
+# tag: yang added
+_C.DATASETS.DATA_SEED=()
 
 # -----------------------------------------------------------------------------
 # DataLoader
@@ -393,6 +395,12 @@ _C.TEST.DETECTIONS_PER_IMG = 100
 # ---------------------------------------------------------------------------- #
 # Misc options
 # ---------------------------------------------------------------------------- #
-_C.OUTPUT_DIR = "."
+# _C.OUTPUT_DIR = "."
+# tag: yang changed
+_C.OUTPUT_DIR = "./output"
+# tag: yang added
+_C.WEIGHT_DIR =''
+_C.LOG_DIR = ''
+_C.CONFIG_DIR = ''
 
 _C.PATHS_CATALOG = os.path.join(os.path.dirname(__file__), "paths_catalog.py")
