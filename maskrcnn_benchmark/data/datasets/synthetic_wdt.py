@@ -45,7 +45,10 @@ class SyntheticWDT(torch.utils.data.Dataset):
 
         with open(self._imgsetpath % self.image_set) as f:
             self.ids = f.readlines()
-        self.ids = [x.strip("\n") for x in self.ids]
+        # self.ids = [x.strip("\n") for x in self.ids]
+        # tag: yang changed
+        # print('ids-----', self.ids[0].split("\t"))
+        self.ids = [x.split("\t")[0] for x in self.ids]
         self.id_to_img_map = {k: v for k, v in enumerate(self.ids)}
 
         cls = SyntheticWDT.CLASSES
@@ -61,7 +64,8 @@ class SyntheticWDT(torch.utils.data.Dataset):
 
         # img, target = self.transforms(img, target)
         # tag: yang adds
-        mask = self.get_mask_from_files(self._maskpath % img_id)
+        mask_file = self._maskpath % img_id
+        mask = self.get_mask_from_file(mask_file)
         if self.transforms is not None:
             img, target, mask = self.transforms[0](img, target, mask)
             img = self.transforms[1](img)
