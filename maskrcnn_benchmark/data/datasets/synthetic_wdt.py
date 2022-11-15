@@ -33,8 +33,8 @@ class SyntheticWDT(torch.utils.data.Dataset):
         # tag: yang adds
         self.data_seed = cfg.DATASETS.DATA_SEED
         if self.data_seed: # !=0
-            self.split = self.split + f"_seed{self.data_seed}"
-            
+            self.image_set = split + f"_seed{self.data_seed}"
+
         self._annopath = os.path.join(self.root, "Annotations", "%s.xml")
         self._imgpath = os.path.join(self.root, "JPEGImages", "%s.jpg")
         self._imgsetpath = os.path.join(self.root, "ImageSets", "Main", "%s.txt")
