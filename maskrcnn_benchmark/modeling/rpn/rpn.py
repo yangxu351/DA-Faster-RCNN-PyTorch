@@ -154,7 +154,7 @@ class RPNModule(torch.nn.Module):
         self.box_selector_test = box_selector_test
         self.loss_evaluator = loss_evaluator
 
-    def forward(self, images, features, targets=None):
+    def forward(self, images, features, targets=None, masks=None):
         """
         Arguments:
             images (ImageList): images for which we want to compute the predictions
@@ -162,14 +162,19 @@ class RPNModule(torch.nn.Module):
                 used for computing the predictions. Each tensor in the list
                 correspond to different feature levels
             targets (list[BoxList): ground-truth boxes present in the image (optional)
-
+            masks: pixel annotation
         Returns:
             boxes (list[BoxList]): the predicted boxes from the RPN, one BoxList per
                 image.
             losses (dict[Tensor]): the losses for the model during training. During
                 testing, it is an empty dict.
         """
-        objectness, rpn_box_regression = self.head(features)
+        # objectness, rpn_box_regression = self.head(features)
+        # tag: yang changed
+        if masks is not None and 'Mask' in self.cfg.MODEL.RPN.RPN_HEAD:
+            objectness, rpn_box_regression, features = self.head(features, masks)
+        else:
+            objectness, rpn_box_regression = self.head(features)
         anchors = self.anchor_generator(images, features)
 
         if self.training:
