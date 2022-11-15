@@ -49,10 +49,17 @@ class RealWDT(torch.utils.data.Dataset):
         target = self.get_groundtruth(index)
         target = target.clip_to_image(remove_empty=True)
 
-        if self.transforms is not None:
-            img, target = self.transforms(img, target)
+        # tag:yang adds
+        mask = None
 
-        return img, target, index
+        # if self.transforms is not None:
+        #     img, target = self.transforms(img, target)
+        # tag: yang changed
+        if self.transforms is not None:
+            img, target = self.transforms[0](img, target)
+            img = self.transforms[1](img)
+            
+        return img, target, mask, index
 
     def __len__(self):
         return len(self.ids)
