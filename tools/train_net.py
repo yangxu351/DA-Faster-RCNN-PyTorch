@@ -178,15 +178,20 @@ def main():
             backend="nccl", init_method="env://"
         )
         synchronize()
-
-    # tag: yang added
-    time_marker = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-    cfg.WEIGHT_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}' + '_Weights')
-    cfg.LOG_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}' + '_Log')
-    cfg.CONFIG_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}' + '_Config')
-    
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
+    # tag: yang added
+    time_marker = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+    # print(cfg.DATASETS.DATA_SEED)
+    if cfg.DATASETS.DATA_SEED:
+        cfg.WEIGHT_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}_sd{cfg.DATASETS.DATA_SEED}' + '_Weights')
+        cfg.LOG_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}_sd{cfg.DATASETS.DATA_SEED}' + '_Log')
+        cfg.CONFIG_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}_sd{cfg.DATASETS.DATA_SEED}' + '_Config')
+    else:
+        cfg.WEIGHT_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}' + '_Weights')
+        cfg.LOG_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}' + '_Log')
+        cfg.CONFIG_DIR = os.path.join(cfg.OUTPUT_DIR,  f'{time_marker}_{cfg.MODEL.BACKBONE.CONV_BODY}' + '_Config')
+    
     cfg.freeze()
 
     log_dir = cfg.LOG_DIR
