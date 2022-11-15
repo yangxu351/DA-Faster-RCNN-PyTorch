@@ -32,7 +32,7 @@ class GeneralizedRCNN(nn.Module):
         self.roi_heads = build_roi_heads(cfg)
         self.da_heads = build_da_heads(cfg)
 
-    def forward(self, images, targets=None):
+    def forward(self, images, targets=None, masks=None):
         """
         Arguments:
             images (list[Tensor] or ImageList): images to be processed
@@ -49,7 +49,10 @@ class GeneralizedRCNN(nn.Module):
             raise ValueError("In training mode, targets should be passed")
         images = to_image_list(images)
         features = self.backbone(images.tensors)
-        proposals, proposal_losses = self.rpn(images, features, targets)
+        # fixme: option2--> mask attention with features before feeding to the RPN module
+        # tag:yang changed
+        # proposals, proposal_losses = self.rpn(images, features, targets)
+        proposals, proposal_losses = self.rpn(images, features, targets, masks)
         da_losses = {}
         if self.roi_heads:
             x, result, detector_losses, da_ins_feas, da_ins_labels = self.roi_heads(features, proposals, targets)
