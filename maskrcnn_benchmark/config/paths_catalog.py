@@ -3,10 +3,27 @@
 
 import os
 
-
 class DatasetCatalog(object):
-    DATA_DIR = "datasets"
+    # DATA_DIR = "datasets"
+    # tag: yang changed
+    DATA_DIR = "/data/users/yang/data"
     DATASETS = {
+        #tag: yang added 
+        "synthetic_data_wdt": {
+            "data_dir": "synthetic_data_wdt/syn_wdt_rnd_sky_rnd_solar_rnd_cam_p3_shdw_step40",
+            "split": "train", # trainval
+            
+        },
+        # tag: yang added 
+        "xilin_wdt_train": {
+            "data_dir": "real_data_wdt/xilin_wdt/",
+            "split": "train_seed0", # trainval
+        },
+        # tag: yang added 
+        "xilin_wdt_test": {
+            "data_dir": "real_data_wdt/xilin_wdt/",
+            "split": "val_aug_seed0", 
+        },
         "coco_2017_train": {
             "img_dir": "coco/train2017",
             "ann_file": "coco/annotations/instances_train2017.json"
@@ -169,6 +186,30 @@ class DatasetCatalog(object):
             )
             return dict(
                 factory="COCODataset",
+                args=args,
+            )
+        # tag: for wdt
+        elif "syn" in name:
+            data_dir = DatasetCatalog.DATA_DIR
+            attrs = DatasetCatalog.DATASETS[name]
+            args = dict(
+                data_dir=os.path.join(data_dir, attrs["data_dir"]),
+                split=attrs["split"],
+            )
+            return dict(
+                factory="SyntheticWDT",
+                args=args,
+            )
+        # tag: for wdt
+        elif "xilin" in name:
+            data_dir = DatasetCatalog.DATA_DIR
+            attrs = DatasetCatalog.DATASETS[name]
+            args = dict(
+                data_dir=os.path.join(data_dir, attrs["data_dir"]),
+                split=attrs["split"],
+            )
+            return dict(
+                factory="RealWDT",
                 args=args,
             )
         elif "voc" in name:
