@@ -2,6 +2,9 @@
 """Centralized catalog of paths."""
 
 import os
+#tag: yang adds
+from maskrcnn_benchmark.config import cfg
+
 
 class DatasetCatalog(object):
     # DATA_DIR = "datasets"
@@ -12,7 +15,7 @@ class DatasetCatalog(object):
         "synthetic_data_wdt": {
             "data_dir": "synthetic_data_wdt/syn_wdt_rnd_sky_rnd_solar_rnd_cam_p3_shdw_step40",
             "split": "train", # trainval
-            
+            "data_seed": cfg.DATASETS.DATA_SEED,
         },
         # tag: yang added 
         "xilin_wdt_train": {
