@@ -12,7 +12,8 @@ else:
 
 
 from maskrcnn_benchmark.structures.bounding_box import BoxList
-
+#tag: yang adds
+from maskrcnn_benchmark.config import cfg    
 
 
 class SyntheticWDT(torch.utils.data.Dataset):
@@ -29,7 +30,11 @@ class SyntheticWDT(torch.utils.data.Dataset):
         self.transforms = transforms
         # tag:yang adds
         self.is_source = is_source
-        
+        # tag: yang adds
+        self.data_seed = cfg.DATASETS.DATA_SEED
+        if self.data_seed: # !=0
+            self.split = self.split + f"_seed{self.data_seed}"
+            
         self._annopath = os.path.join(self.root, "Annotations", "%s.xml")
         self._imgpath = os.path.join(self.root, "JPEGImages", "%s.jpg")
         self._imgsetpath = os.path.join(self.root, "ImageSets", "Main", "%s.txt")
