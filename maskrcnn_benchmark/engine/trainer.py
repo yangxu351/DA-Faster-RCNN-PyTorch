@@ -134,14 +134,20 @@ def do_da_train(
     model.train()
     start_training_time = time.time()
     end = time.time()
-    for iteration, ((source_images, source_targets, idx1), (target_images, target_targets, idx2)) in enumerate(zip(source_data_loader, target_data_loader), start_iter):
+    # tag: yang changed
+    # for iteration, ((source_images, source_targets, idx1), (target_images, target_targets, idx2)) in enumerate(zip(source_data_loader, target_data_loader), start_iter):
+    for iteration, ((source_images, source_targets, source_masks, idx1), (target_images, target_targets, target_masks, idx2)) in enumerate(zip(source_data_loader, target_data_loader), start_iter):
         data_time = time.time() - end
         arguments["iteration"] = iteration
 
         images = (source_images+target_images).to(device)
         targets = [target.to(device) for target in list(source_targets+target_targets)]
+        # tag: yang adds
+        masks = (source_masks+target_masks).to(device)
 
-        loss_dict = model(images, targets)
+        # tag: yang changed
+        # loss_dict = model(images, targets)
+        loss_dict = model(images, targets, masks)
 
         losses = sum(loss for loss in loss_dict.values())
 
