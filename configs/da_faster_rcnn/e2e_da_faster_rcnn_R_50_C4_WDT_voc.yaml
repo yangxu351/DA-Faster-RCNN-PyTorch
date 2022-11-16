@@ -20,7 +20,7 @@ DATASETS:
   SOURCE_TRAIN: ("synthetic_data_wdt",)
   TARGET_TRAIN: ("xilin_wdt_train",)
   TEST: ("xilin_wdt_test",)
-  DATA_SEED: 0
+  DATA_SEED: -1
 INPUT:
   MIN_SIZE_TRAIN: (600,)
   MAX_SIZE_TRAIN: 1200
