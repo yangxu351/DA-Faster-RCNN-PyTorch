@@ -37,7 +37,9 @@ def cache_url(url, model_dir=None, progress=True):
     """
     if model_dir is None:
         torch_home = os.path.expanduser(os.getenv('TORCH_HOME', '~/.torch'))
-        model_dir = os.getenv('TORCH_MODEL_ZOO', os.path.join(torch_home, 'models'))
+        # model_dir = os.getenv('TORCH_MODEL_ZOO', os.path.join(torch_home, 'models'))
+        # tag: yang changed to avoid overwriting
+        model_dir = os.getenv('TORCH_MODEL_ZOO', os.path.join(torch_home, 'models_DAfst'))
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
     parts = urlparse(url)
