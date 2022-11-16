@@ -47,8 +47,11 @@ class SyntheticWDT(torch.utils.data.Dataset):
             self.ids = f.readlines()
         # self.ids = [x.strip("\n") for x in self.ids]
         # tag: yang changed
-        # print('ids-----', self.ids[0].split("\t"))
-        self.ids = [x.split("\t")[0] for x in self.ids]
+        if self.data_seed ==-1:
+            self.ids = [x.split("\t")[0] for x in self.ids]
+        else:
+            self.ids = [x.strip("\n") for x in self.ids]
+
         self.id_to_img_map = {k: v for k, v in enumerate(self.ids)}
 
         cls = SyntheticWDT.CLASSES
