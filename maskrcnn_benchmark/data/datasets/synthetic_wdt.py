@@ -32,7 +32,7 @@ class SyntheticWDT(torch.utils.data.Dataset):
         self.is_source = is_source
         # tag: yang adds
         self.data_seed = cfg.DATASETS.DATA_SEED
-        if self.data_seed: # !=0
+        if self.data_seed >=0: # !=-1
             self.image_set = split + f"_seed{self.data_seed}"
 
         self._annopath = os.path.join(self.root, "Annotations", "%s.xml")
@@ -41,9 +41,11 @@ class SyntheticWDT(torch.utils.data.Dataset):
 
         with open(self._imgsetpath % self.image_set) as f:
             self.ids = f.readlines()
-        # self.ids = [x.strip("\n") for x in self.ids]
-        #tag:yang changed
-        self.ids = [x.split("\t")[0] for x in self.ids]
+        if self.data_seed >=0:
+            self.ids = [x.strip("\n") for x in self.ids]
+        else: # self.data_seed==-1
+            #tag:yang changed
+            self.ids = [x.split("\t")[0] for x in self.ids]
         self.id_to_img_map = {k: v for k, v in enumerate(self.ids)}
 
         cls = SyntheticWDT.CLASSES
