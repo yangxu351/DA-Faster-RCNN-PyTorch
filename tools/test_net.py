@@ -30,7 +30,7 @@ def main():
     parser.add_argument(
         "--ckpt",
         help="The path to the checkpoint for test, default is the latest checkpoint.",
-        default="/data/users/yang/code/DA-Faster-RCNN-PyTorch/output/20221114_0452_R-50-C4_Weights/model_final.pth",
+        default="output/20221114_0452_R-50-C4_Weights/model_final.pth",
     )
     parser.add_argument("--local_rank", type=int, default=0)
     parser.add_argument(
@@ -51,11 +51,8 @@ def main():
             backend="nccl", init_method="env://"
         )
         synchronize()
-    
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
-    cfg.freeze()
-
     # tag: yang added
     if args.ckpt is not None:
         config_dir = os.path.dirname(args.ckpt).replace('Weights', 'Config')
@@ -65,6 +62,9 @@ def main():
         config_dir = os.path.join(cfg.OUTPUT_DIR, "Config")
         log_dir = os.path.join(cfg.OUTPUT_DIR, "Log")
         weight_dir = os.path.dirname(cfg.OUTPUT_DIR, "Weights")
+    
+    
+    cfg.freeze()
 
     logger = setup_logger("maskrcnn_benchmark", log_dir, get_rank(), 'log_pred.txt')
     logger.info("Using {} GPUs".format(num_gpus))
@@ -78,6 +78,7 @@ def main():
 
     checkpointer = DetectronCheckpointer(cfg, model, save_dir=weight_dir)
     _ = checkpointer.load(cfg.MODEL.WEIGHT)
+    
 
     iou_types = ("bbox",)
     if cfg.MODEL.MASK_ON:
