@@ -136,7 +136,7 @@ def get_arg(cmt='syn_wdt_rnd_sky_rnd_solar_rnd_cam_p3_shdw_step40', syn=True, wo
     return args
 
 if __name__ == '__main__':
-    data_seed = 0 # default
+    data_seed = 0 
     # data_seed = 1
     # data_seed = 2
 
